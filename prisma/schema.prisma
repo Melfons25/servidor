@@ -1,0 +1,64 @@
+// Archivo: prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // ¡CORRECCIÓN! Esta línea le dice a Prisma que use la variable del archivo .env
+  url      = env("DATABASE_URL") 
+}
+
+// MODELOS DE LA BIBLIOTECA
+model Usuario {
+  id      Int      @id @default(autoincrement())
+  nombre  String
+  apellido String
+  tipo    String // Ejemplo: "Adulto", "Niño"
+  
+  prestamos Prestamo[] // Relación: Un Usuario tiene muchos Préstamos
+}
+
+model Libro {
+  id          Int      @id @default(autoincrement())
+  titulo      String   @unique
+  isbn        String   @unique
+  fechaPublicacion DateTime
+  copiasDisponibles Int
+  
+  prestamos Prestamo[]  // Relación: Un Libro tiene muchos Préstamos
+  autores   Libro_Autor[] // Relación: Un Libro tiene muchos Autores (a través de la tabla intermedia)
+}
+
+model Autor {
+  id     Int      @id @default(autoincrement())
+  nombre String
+  apellido String
+  
+  libros Libro_Autor[] // Relación: Un Autor tiene muchos Libros (a través de la tabla intermedia)
+}
+
+// Tabla de Unión (para la relación Muchos a Muchos entre Libro y Autor)
+model Libro_Autor {
+  libroId Int
+  autorId Int
+  
+  libro   Libro @relation(fields: [libroId], references: [id])
+  autor   Autor @relation(fields: [autorId], references: [id])
+  
+  @@id([libroId, autorId]) // Clave Primaria compuesta
+}
+
+model Prestamo {
+  id         Int      @id @default(autoincrement())
+  fechaPrestamo DateTime @default(now())
+  fechaDevolucionEstimada DateTime
+  fechaDevolucionReal DateTime? // Puede ser nulo
+  
+  usuarioId Int
+  libroId   Int
+  
+  usuario Usuario @relation(fields: [usuarioId], references: [id]) // Relación a Usuario
+  libro   Libro   @relation(fields: [libroId], references: [id])   // Relación a Libro
+}
