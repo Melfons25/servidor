@@ -30,8 +30,8 @@ app.get("/hello", (req, res) => {
 app.post('/usuarios', async (req, res) => {
     try {
         // Validación básica de campos requeridos por tu modelo Usuario
-        if (!req.body.nombre || !req.body.apellido || !req.body.tipo) {
-            return res.status(400).json({ error: 'Faltan campos obligatorios (nombre, apellido, tipo).' });
+        if (!req.body.nombre || !req.body.apellido || !req.body.email || !req.body.fechaNacimiento) {
+            return res.status(400).json({ error: 'Faltan campos obligatorios (nombre, apellido, email,fechaNacimiento).' });
         }
 
         // Crea el usuario en la base de datos usando Prisma
@@ -39,7 +39,8 @@ app.post('/usuarios', async (req, res) => {
             data: {
                 nombre: req.body.nombre,
                 apellido: req.body.apellido,
-                tipo: req.body.tipo,
+                email: req.body.email,
+                fechaNacimiento: req.body.fechaNacimiento
                 // Si tu modelo tiene más campos obligatorios, deben ir aquí.
             },
         });
