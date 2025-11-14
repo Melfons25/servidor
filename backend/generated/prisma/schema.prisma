@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelos de la base de datos de la biblioteca
+model Usuario {
+  id_usuario     Int        @id @default(autoincrement())
+  nombre         String
+  email          String?    @unique
+  telefono       String?
+  direccion      String?
+  fecha_registro DateTime   @default(now())
+  prestamos      Prestamo[]
+}
+
+model Libro {
+  id_libro         Int          @id @default(autoincrement())
+  titulo           String
+  codigo_libro     String       @unique @map("codigo_libro")
+  anio_publicacion Int?
+  editorial        String?
+  stock            Int          @default(1)
+  prestamos        Prestamo[]
+  autores          LibroAutor[]
+}
+
+model Autor {
+  id_autor Int          @id @default(autoincrement())
+  nombre   String
+  libros   LibroAutor[]
+}
+
+model Prestamo {
+  id_prestamo               Int       @id @default(autoincrement())
+  id_usuario                Int
+  id_libro                  Int
+  fecha_prestamo            DateTime  @default(now())
+  fecha_devolucion_esperada DateTime
+  fecha_devolucion_real     DateTime?
+  estado_prestamo           String
+  usuario                   Usuario   @relation(fields: [id_usuario], references: [id_usuario])
+  libro                     Libro     @relation(fields: [id_libro], references: [id_libro])
+}
+
+model LibroAutor {
+  id_libro Int
+  id_autor Int
+  libro    Libro @relation(fields: [id_libro], references: [id_libro])
+  autor    Autor @relation(fields: [id_autor], references: [id_autor])
+
+  @@id([id_libro, id_autor])
+}
